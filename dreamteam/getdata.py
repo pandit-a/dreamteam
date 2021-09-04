@@ -5,7 +5,7 @@ import pandas as pd
 file = r'/Users/anand/Documents/Sleep/WSC - variable cross-check_sparse.xlsx'
 data = r'/Users/anand/Documents/Sleep/wsc-dataset-0.2.0.csv'
 
-def get_data():
+def get_data1():
     """
     returns df/excel indicating which columns to keep and data_df/csv which is main data frame
     """
@@ -20,7 +20,7 @@ def clean_data(df, data_df, duplicates = True):
     data_df = data_df.drop(deleted_cols.to_list(), axis=1)
     data_df.set_index('wsc_id', inplace=True)
 
-    if duplicates = False:
+    if duplicates == False:
         data_df.drop_duplicates('wsc_id', inplace=True)
 
     data_df.nasal_cong_none.replace({np.nan:0,'Y':1}, inplace=True)
