@@ -181,7 +181,7 @@ def preproc_x(data_df, targs, balthresh):
 def preproc_y(data_df, waso1, se1, se2, tst1, tst2):
 
     "target options are 'se', 'waso', 'tst"
-    "a and b are classification thresholds based on normal parameters decided for that target"
+    "waso1,se1,se2,tst1,tst2 are classification thresholds based on normal parameters decided for that target"
 
     y1 = data_df.waso
     y1 = y1.reset_index(drop=True)
