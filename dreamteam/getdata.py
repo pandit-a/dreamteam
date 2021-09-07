@@ -8,8 +8,8 @@ from sklearn.preprocessing import StandardScaler, RobustScaler
 
 "will need changing if files uploaded to GCP or AWS bucket"
 
-file = r'/Users/anand/Documents/Sleep/WSC - variable cross-check_sparse.xlsx'
-data = r'/Users/anand/Documents/Sleep/wsc-dataset-0.2.0.csv'
+file = r'/home/mnm7/code/pandit-a/dreamteam/raw_data/WSC - variable cross-check_sparse.xlsx'
+data = r'/home/mnm7/code/pandit-a/dreamteam/raw_data/wsc-dataset-0.2.0.csv'
 
 def get_data():
     """
