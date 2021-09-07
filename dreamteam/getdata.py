@@ -178,23 +178,31 @@ def preproc_x(data_df, targs, balthresh):
 
     return X
 
-def preproc_y(data_df, target, a, b):
+def preproc_y(data_df, waso1, se1, se2, tst1, tst2):
 
     "target options are 'se', 'waso', 'tst"
     "a and b are classification thresholds based on normal parameters decided for that target"
 
-    if target == 'waso':
-      y = data_df.waso
-      y = y.reset_index(drop=True)
-      y[(y <= a)] = 0
-      y[(y > a)] = 1
+    y1 = data_df.waso
+    y1 = y1.reset_index(drop=True)
+    y1[(y1 <= waso1)] = 0
+    y1[(y1 > waso1)] = 1
 
-    elif target == 'se' or target == 'tst':
-      y = data_df[target]
-      y = y.reset_index(drop=True)
 
-      y[(y < a) | (y > b)] = 1
-      y[(y >= a) & (y <= b)] = 0
+    y2 = data_df.se
+    y2 = y2.reset_index(drop=True)
+    y2[(y2 < se1) | (y2 > se2)] = 1
+    y2[(y2 >= se1) & (y2 <= se2)] = 0
+
+
+    y3 = data_df.tst
+    y3 = y3.reset_index(drop=True)
+
+    y3[(y3 < tst1) | (y3 > tst2)] = 1
+    y3[(y3 >= tst1) & (y3 <= tst2)] = 0
+
+    frames = [y1, y2, y3]
+    y = pd.concat(frames, axis=1)
 
     return y
 
