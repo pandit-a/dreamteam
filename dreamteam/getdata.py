@@ -72,34 +72,18 @@ def preproc_gen(data_df):
             ##print(data_df[v].unique(),v)
             data_df[objlist[i]].replace\
             ({'N':0,'Y':1}, inplace=True)
+    
+    imbalanced_features = ['diabetes_ynd',
+                           'apnea',
+                           'narcotics_med',
+                           'androgen_med',
+                           'stimulants_med'
+                            ]
 
-    ohe = OneHotEncoder(handle_unknown='ignore',sparse=False)
+    data_df.drop(columns=imbalanced_features, axis=1, inplace=True)
 
-
-    ## Only variables which need OHE
-    X1 = data_df[['thyroid_problem']]
-    X2 = data_df[['hormone_therapy']]
-
-    ##fit transform, extract column names, make dataframe with column names, drop nan row
-
-    X1t = ohe.fit_transform(X1)
-    colnames = list(ohe.get_feature_names())
-    X1df = pd.DataFrame(X1t, columns = colnames)
-    X1df.drop(columns = 'x0_nan', inplace=True)
-    X1df.index = data_df.index
-
-    X2t = ohe.fit_transform(X2)
-    colnames = list(ohe.get_feature_names())
-    X2df = pd.DataFrame(X2t, columns = colnames)
-    X2df.drop(columns = 'x0_nan', inplace=True)
-    X2df.index = data_df.index
-
-    frames = [data_df, X1df, X2df]
-    data_df = pd.concat(frames, axis = 1)
-
-    ##drop original row names
-
-    data_df.drop(columns = ['thyroid_problem','hormone_therapy'], inplace=True)
+    data_df['thyroid_problem'] = data_df.thyroid_problem.apply(lambda x: 1 if x in ['Hypothyroid', 'Hyperthyroid'] else 0)
+    print(data_df.thyroid_problem.unique())
 
     "Set targets"
 
@@ -110,73 +94,122 @@ def preproc_gen(data_df):
 
     imputenum = SimpleImputer(strategy='median')
     data_df[targs] = imputenum.fit_transform(data_df[targs])
+    data_df.drop(columns=targs, axis=1, inplace=True)
 
     return data_df, targs
+    # ohe = OneHotEncoder(handle_unknown='ignore',sparse=False)
+    
+
+    # ## Only variables which need OHE
+    # X1 = data_df[['thyroid_problem']]
+    # X2 = data_df[['hormone_therapy']]
+
+    ##fit transform, extract column names, make dataframe with column names, drop nan row
+
+    # X1t = ohe.fit_transform(X1)
+    # colnames = list(ohe.get_feature_names())
+    # X1df = pd.DataFrame(X1t, columns = colnames)
+    # X1df.drop(columns = 'x0_nan', inplace=True)
+    # X1df.index = data_df.index
+
+    # X2t = ohe.fit_transform(X2)
+    # colnames = list(ohe.get_feature_names())
+    # X2df = pd.DataFrame(X2t, columns = colnames)
+    # X2df.drop(columns = 'x0_nan', inplace=True)
+    # X2df.index = data_df.index
+
+    # frames = [data_df, X1df, X2df]
+    # data_df = pd.concat(frames, axis = 1)
+
+    ##drop original row names
+
+    # data_df.drop(columns = ['thyroid_problem','hormone_therapy'], inplace=True)
+
+    # "Set targets"
+
+    # targs = ['sleep_latency', 'tst', 'tst_rem', 'tst_nrem', 'tso', 'totsleep',
+    #     'ess', 'p_eval_sleep', 'a_eval_slept', 'a_eval_hour', 'a_eval_sleep',
+    #     'ps_eds', 'se', 'waso', 'sleepiness', 'workday', 'weekend', 'ps_diff',
+    #     'ps_diff', 'ps_backsleep', 'ps_wakerepeat', 'ps_wakeup', 'ps_eds']
+
+    # imputenum = SimpleImputer(strategy='median')
+    # data_df[targs] = imputenum.fit_transform(data_df[targs])
+
+    # return data_df, targs
 
 
-def preproc_x(data_df, targs, balthresh):
+# def preproc_x(data_df, targs, balthresh):
 
-    "drop all targets from X"
+#     # "drop all targets from X"
 
-    X = data_df.drop(columns=targs)
-    cols = X.columns
+#     # X = data_df.drop(columns=targs)
+#     # cols = X.columns
 
-    "set numerical features"
+#     "set numerical features"
 
-    numeric_features = [
-        'hdl', 'ldl', 'total_cholesterol', 'triglycerides', 'weightkg',
-        'hipgirthm', 'neckgirthm', 'waistgirthm', 'waisthip', 'sitsysm',
-        'sitdiam', 'packs_week', 'pack_years', 'naps', 'snore_freq',
-        'num_pregnancies', 'age', 'heightcm', 'caffeine', 'alcohol_wk',
-        'eval_general', 'eval_life', 'eval_health', 'snore_vol', 'choke_freq',
-        'apnea_freq', 'awake_freq'
-    ]
+#     numeric_features = [
+#         'hdl', 'ldl', 'total_cholesterol', 'triglycerides', 'weightkg',
+#         'hipgirthm', 'neckgirthm', 'waistgirthm', 'waisthip', 'sitsysm',
+#         'sitdiam', 'packs_week', 'pack_years', 'naps', 'snore_freq',
+#         'num_pregnancies', 'age', 'heightcm', 'caffeine', 'alcohol_wk',
+#         'eval_general', 'eval_life', 'eval_health', 'snore_vol', 'choke_freq',
+#         'apnea_freq', 'awake_freq'
+#     ]
 
-    "set categorical features as features which aren't numerical or target"
+#     "set categorical features as features which aren't numerical or target"
 
-    categoric = data_df.drop(columns=targs)
-    categoric.drop(columns=numeric_features, inplace=True)
-    categorical_features = categoric.columns
+#     categoric = data_df.drop(columns=targs)
+#     categoric.drop(columns=numeric_features, inplace=True)
+#     categorical_features = categoric.columns
 
-    "categorical transformer"
+#     "categorical transformer"
 
-    categorical_transformer = Pipeline(
-        steps=[('imputer', SimpleImputer(strategy='median'))])
+#     categorical_transformer = Pipeline(
+#         steps=[('imputer', SimpleImputer(strategy='median'))])
 
-    "numerical transformer"
+#     "categorical transformer 2"
+#     ohe_features = [['hormone_therapy']]
 
-    numeric_transformer = Pipeline(
-        steps=[('imputer',
-                SimpleImputer(strategy='mean')), ('scaler', RobustScaler())])
+#     ohe_transformer = Pipeline(
+#         steps=[('imputer_2', SimpleImputer(strategy='constant', fill_value='Unknown')),
+#                ('ohe', OneHotEncoder(handle_unknown='ignore',sparse=False))]
+#     )
 
-    preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', numeric_transformer, numeric_features),\
-        ('cat', categorical_transformer, categorical_features)])
+#     "numerical transformer"
 
-    prepipe = Pipeline(steps=[('preprocessor', preprocessor)])
+#     numeric_transformer = Pipeline(
+#         steps=[('imputer',
+#                 SimpleImputer(strategy='mean')), ('scaler', RobustScaler())])
 
-    X = prepipe.fit_transform(X)
-    X = pd.DataFrame(X, columns=cols)
-    X.drop(columns=['wsc_vst'], inplace=True)
+#     preprocessor = ColumnTransformer(
+#     transformers=[
+#         ('num', numeric_transformer, numeric_features),\
+#         ('cat', categorical_transformer, categorical_features),
+#         ('ohe_transform',ohe_transformer, ohe_features)], remainder='drop')
 
-    "remove imbalanced features according to balthresh"
+#     prepipe = Pipeline(steps=[('preprocessor', preprocessor)])
 
-    imbalanced_classes = []
-    for col in X.columns:
-        _ = X.columns.get_loc(col)
-        if X.iloc[:,
-                  _].value_counts(normalize=True).head(1).values > balthresh:
-            imbalanced_classes.append((col, X.iloc[:, _].value_counts(
-                normalize=True).head(1).values.astype(float)))
+#     X = prepipe.fit_transform(X)
+#     X = pd.DataFrame(X, columns=cols)
+#     X.drop(columns=['wsc_vst'], inplace=True)
 
-    imbalanced_list = []
-    for classes in imbalanced_classes:
-        imbalanced_list.append(classes[0])
+#     # "remove imbalanced features according to balthresh"
 
-    X.drop(imbalanced_list, axis=1, inplace=True)
+    # imbalanced_classes = []
+    # for col in X.columns:
+    #     _ = X.columns.get_loc(col)
+    #     if X.iloc[:,
+    #               _].value_counts(normalize=True).head(1).values > balthresh:
+    #         imbalanced_classes.append((col, X.iloc[:, _].value_counts(
+    #             normalize=True).head(1).values.astype(float)))
 
-    return X
+    # imbalanced_list = []
+    # for classes in imbalanced_classes:
+    #     imbalanced_list.append(classes[0])
+
+    # X.drop(imbalanced_list, axis=1, inplace=True)
+
+    # return X
 
 def preproc_y(data_df, waso1, se1, se2, tst1, tst2):
 
